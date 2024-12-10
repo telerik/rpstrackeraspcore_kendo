@@ -1,26 +1,49 @@
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using RPS.Data;
 
-namespace RPS.Web
-{
-    public class Program
+var builder = WebApplication.CreateBuilder(args);
+
+var tempDataContext = new PtInMemoryContext();
+
+builder.Services.AddSingleton<IPtUserRepository>(c => new PtUserRepository(tempDataContext));
+builder.Services.AddSingleton<IPtItemsRepository>(c => new PtItemsRepository(tempDataContext));
+builder.Services.AddSingleton<IPtDashboardRepository>(c => new PtDashboardRepository(tempDataContext));
+builder.Services.AddSingleton<IPtTasksRepository>(c => new PtTasksRepository(tempDataContext));
+builder.Services.AddSingleton<IPtCommentsRepository>(c => new PtCommentsRepository(tempDataContext));
+
+builder.Services.AddRazorPages();
+builder.Services.AddMvc()
+    .AddRazorPagesOptions(options =>
     {
-        public static void Main(string[] args)
-        {
-            CreateHostBuilder(args).Build().Run();
-        }
+        options.Conventions.AddPageRoute("/Dashboard", "");
+    });
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.UseStartup<Startup>();
-                });
-    }
+builder.Services.AddKendo();
+
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
 }
+else
+{
+    app.UseExceptionHandler("/Error");
+    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseHsts();
+}
+
+app.UseHttpsRedirection();
+
+app.UseRouting();
+
+app.UseAuthorization();
+
+app.MapStaticAssets();
+app.MapRazorPages()
+   .WithStaticAssets();
+
+app.Run();
