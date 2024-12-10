@@ -21,7 +21,7 @@ namespace RPS.Data
 
             PtComment comment = new PtComment
             {
-                Id = item.Comments.Max(t => t.Id) + 1,
+                Id = item.Comments.Count() > 0 ? item.Comments.Max(t => t.Id) + 1 : 1,
                 Title = newComment.Title,
                 DateCreated = DateTime.Now,
                 DateModified = DateTime.Now,

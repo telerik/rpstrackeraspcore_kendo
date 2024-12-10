@@ -21,7 +21,7 @@ namespace RPS.Data
 
             PtTask task = new PtTask
             {
-                Id = item.Tasks.Max(t=>t.Id) + 1,
+                Id = item.Tasks.Count() > 0 ? item.Tasks.Max(t => t.Id) + 1 : 1,
                 Title = newTask.Title,
                 Completed = false,
                 DateCreated = DateTime.Now,
