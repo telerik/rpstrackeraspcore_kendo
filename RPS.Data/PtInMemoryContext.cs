@@ -1,9 +1,10 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json;
 using RPS.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Text.Json.Serialization;
 
 namespace RPS.Data
 {
@@ -30,7 +31,13 @@ namespace RPS.Data
                 contentsItems = file.ReadToEnd();
             }
 
-            items = JsonConvert.DeserializeObject<List<PtItem>>(contentsItems);
+            var serializationOptions = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
+            };
+
+            items = JsonSerializer.Deserialize<List<PtItem>>(contentsItems, serializationOptions);
             ModifyItemDates(items);
 
             string contentsUsers = "[]";
@@ -41,7 +48,7 @@ namespace RPS.Data
                 contentsUsers = file.ReadToEnd();
             }
 
-            users = JsonConvert.DeserializeObject<List<PtUser>>(contentsUsers);
+            users = JsonSerializer.Deserialize<List<PtUser>>(contentsUsers, serializationOptions);
         }
 
         private void ModifyItemDates(List<PtItem> items)
